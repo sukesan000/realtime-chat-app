@@ -1,6 +1,9 @@
 const express = require("express");
 const app = express();
 
+// env.local.jsonから設定を読み込む
+const env = require("../env/env.local.json");
+
 const http = require("http");
 const server = http.createServer(app);
 const { Server } = require("socket.io");
@@ -25,14 +28,14 @@ const maxChatHistory = 10; // チャットを保持する最大件数
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: env.FRONTEND_URL,
   },
 });
 
 const PORT = 5000;
 
 // MongoDBへの接続
-mongoose.connect("mongodb://localhost:27017/real_chat", {
+mongoose.connect(env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -62,7 +65,7 @@ async function getChatHistory() {
 }
 
 app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+  res.setHeader("Access-Control-Allow-Origin", env.FRONTEND_URL);
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   next();
@@ -98,6 +101,7 @@ io.on("connection", (socket) => {
       console.log("Chat data saved");
     } catch (err) {
       console.error("Error saving chat data:", err);
+      return;
     }
 
     // チャット履歴を取得し、クライアントへ送信
