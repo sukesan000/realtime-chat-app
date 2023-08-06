@@ -1,8 +1,15 @@
 const express = require("express");
 const app = express();
 
-// env.local.jsonから設定を読み込む
-const env = require("../env/env.local.json");
+// ローカル環境
+//const frontendUrl = "http://localhost:3000";
+//const mongodbUri = "mongodb://localhost:27017/real_chat";
+//商用環境
+const frontendUrl = "http://160.248.8.135:3000";
+const mongodbUri = "mongodb://160.248.8.135:27017/real_chat";
+
+console.log("frontendUrl: " + frontendUrl);
+console.log("mongodbUri: " + mongodbUri);
 
 const http = require("http");
 const server = http.createServer(app);
@@ -28,14 +35,14 @@ const maxChatHistory = 10; // チャットを保持する最大件数
 
 const io = new Server(server, {
   cors: {
-    origin: env.FRONTEND_URL,
+    origin: frontendUrl,
   },
 });
 
 const PORT = 5000;
 
 // MongoDBへの接続
-mongoose.connect(env.MONGODB_URI, {
+mongoose.connect(mongodbUri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -65,7 +72,7 @@ async function getChatHistory() {
 }
 
 app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", env.FRONTEND_URL);
+  res.setHeader("Access-Control-Allow-Origin", frontendUrl);
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   next();
